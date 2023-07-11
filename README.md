@@ -3,7 +3,7 @@
 
 ## Содержание
 
-- [Задание 1. Elasticsearch](#Задание-1.-Elasticsearch)
+- [Задание 1. Elasticsearch](#Задание-1)
 - [Задание 2. Kibana](#Задание-2)  
 - [Задание 3. Logstash](#Задание-3) 
 - [Задание 4. Filebeat](#Задание-4)  
@@ -21,7 +21,7 @@
 - [как просматривать логи в kibana](https://www.elastic.co/guide/en/kibana/current/discover.html);
 - [решение ошибки increase vm.max_map_count elasticsearch](https://stackoverflow.com/questions/42889241/how-to-increase-vm-max-map-count).
 
-## Задание 1. Elasticsearch 
+## Задание 1 
 > Установите и запустите Elasticsearch, после чего поменяйте параметр cluster_name на случайный.   
 *Приведите скриншот команды 'curl -X GET 'localhost:9200/_cluster/health?pretty', сделанной на сервере с установленным Elasticsearch. Где будет виден нестандартный cluster_name*.
 
