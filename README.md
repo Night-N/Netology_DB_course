@@ -7,12 +7,9 @@
 - [Задание 2. Kibana](#Задание-2-Kibana)  
 - [Задание 3. Logstash](#Задание-3-Logstash) 
 - [Задание 4. Filebeat](#Задание-4-Filebeat)  
-- [Задание 5. Доставка данных](#Задание-5-Доставка-данных)  
-
 
 ## Дополнительные ресурсы
 При выполнении задания используйте дополнительные ресурсы:
-- [docker-compose elasticsearch + kibana](11-03/docker-compose.yaml);
 - [поднимаем elk в docker](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/docker.html);
 - [поднимаем elk в docker с filebeat и docker-логами](https://www.sarulabs.com/post/5/2019-08-12/sending-docker-logs-to-elasticsearch-and-kibana-with-filebeat.html);
 - [конфигурируем logstash](https://www.elastic.co/guide/en/logstash/7.17/configuration.html);
@@ -21,6 +18,8 @@
 - [привязываем индексы из elastic в kibana](https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html);
 - [как просматривать логи в kibana](https://www.elastic.co/guide/en/kibana/current/discover.html);
 - [решение ошибки increase vm.max_map_count elasticsearch](https://stackoverflow.com/questions/42889241/how-to-increase-vm-max-map-count).
+
+
 
 ## Задание 1. Elasticsearch
 > Установите и запустите Elasticsearch, после чего поменяйте параметр cluster_name на случайный.   
@@ -37,8 +36,3 @@
 ## Задание 4. Filebeat
 > Установите и запустите Filebeat. Переключите поставку логов Nginx с Logstash на Filebeat.  
 *Приведите скриншот интерфейса Kibana, на котором видны логи Nginx, которые были отправлены через Filebeat.*
-
-## Задание 5. Доставка данных 
->Настройте поставку лога в Elasticsearch через Logstash и Filebeat любого другого сервиса , но не Nginx.  
-Для этого лог должен писаться на файловую систему, Logstash должен корректно его распарсить и разложить на поля.   
-*Приведите скриншот интерфейса Kibana, на котором будет виден этот лог и напишите лог какого приложения отправляется.*
