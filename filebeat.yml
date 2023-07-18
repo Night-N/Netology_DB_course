@@ -1,0 +1,17 @@
+filebeat.config:
+  modules:
+    enabled: true
+    path: /usr/share/filebeat/modules.d/*.yml 
+    reload.enabled: false
+
+setup.kibana:
+  host: ${KIBANA_HOSTS}
+
+output.elasticsearch:
+  hosts: ${ELASTIC_HOSTS}
+
+http.enabled: true
+http.port: 5066
+monitoring.enabled: false
+monitoring.cluster_uuid: "FzMrNr_fS5eCO250wLtsaw"
+http.host: 0.0.0.0
