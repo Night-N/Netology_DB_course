@@ -48,14 +48,24 @@ mysqlsh -h localhost -u sys_temp -P 3306 < ./sakila-db/sakila-data.sql
 
 - 1.3 Список пользователей  
 ![](./img/task1-1.jpg)  
+
+
 - 1.5 Список прав пользователя  
 ![](./img/task1-2.jpg) 
+
+
 - 1.8 ER диаграмма в Dbeaver  
 ![](./img/task1-3.jpg) 
+
+
 - 1.8 ER диаграмма phpmyadmin (phpmyadmin запущен в соседнем контейнере докера в одной сети с mysql)  
 ![](./img/task1-4.jpg) 
+
+
 - 1.8 Список таблиц базы данных (CLI)  
 ![](./img/task1-5.jpg) 
+
+
 - 1.8 Список таблиц с типом
 ```sql
 SELECT table_name, table_type, engine
@@ -63,6 +73,8 @@ FROM information_schema.tables
 WHERE table_schema = 'sakila' ORDER BY table_name;
 ```
 ![](./img/task1-6.jpg) 
+
+
 
 ### Задание 2
 >Составьте таблицу, используя любой текстовый редактор или Excel, в которой должно быть два столбца: в первом должны быть названия таблиц восстановленной базы, во втором названия первичных ключей этих таблиц. Пример: (скриншот/текст)  
