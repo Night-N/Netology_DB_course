@@ -59,7 +59,7 @@ from
 order by
     rental_date desc
 limit
-    10;
+    5;
 ```
 ### Задание 4
 >Одним запросом получите активных покупателей, имена которых Kelly или Willie. 
