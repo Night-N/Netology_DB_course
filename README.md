@@ -28,7 +28,7 @@ join staff on store.store_id = staff.store_id
 group by staff.staff_id, city.city_id
 having num_of_customers > 300;
 ```
-<img src='./img/task1.jpg' width='600'>  
+<img src='./img/task1.jpg' width='800'>  
 
 
 ### Задание 2
