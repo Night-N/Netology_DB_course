@@ -45,9 +45,9 @@ where film.length >
 ### Задание 3
 >Получите информацию, за какой месяц была получена наибольшая сумма платежей, и добавьте информацию по количеству аренд за этот месяц.
 ```sql
-select month(payment.payment_date) as month, count(payment.payment_id) as payments,  sum(payment.amount) as sum
+select  date_format(payment.payment_date, '%M-%Y') as month, count(payment.payment_id) as payments,  sum(payment.amount) as sum
 from payment
-group by month(payment.payment_date)
+group by date_format(payment.payment_date, '%M-%Y')
 order by sum(payment.amount) desc
 limit 1;
 ```
