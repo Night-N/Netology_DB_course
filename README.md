@@ -66,13 +66,13 @@ select concat(c.last_name, ' ', c.first_name), f.title, sum(p.amount) over (part
 from payment p, rental r, customer c, inventory i, film f
 where date(p.payment_date) = '2005-07-30' and p.payment_date = r.rental_date and r.customer_id = c.customer_id and i.inventory_id = r.inventory_id and i.film_id = f.film_id
 ```
-Добавив поле с названием фильма f.title, и указав условие по которому добавляется таблица film i.film_id = f.film_id
+Добавив поле с названием фильма f.title, и указав условие по которому добавляется таблица film i.film_id = f.film_id  
 В этом случае получаем такую выборку:  
 ![](./img/task2-1.jpg)  
-А время выполнения запроса (согласно explain analyze) сокращается с 3741 до 7, а фактическое в IDE с 3с до 38мс.
+Время выполнения запроса (согласно explain analyze) сокращается с 3741 до 7, а фактическое в IDE с 3с до 38мс.
 
 
-2. Если всё-таки задача - получить данные по количеству оплат от каждого пользователя в конкретный день (что и происходит при выполнении изначального запроса), то таблицы film и iventory вообще не нужны. 
+2. Если всё-таки задача - получить данные по количеству оплат от каждого пользователя в конкретный день (что и происходит при выполнении изначального запроса), то таблицы film и inventory вообще не нужны. 
 Кроме того, логичнее и нагляднее все необходимые таблицы присоединить джойнами. 
 ```sql
 select distinct concat(c.last_name, ' ', c.first_name), sum(p.amount) over (partition by c.customer_id)
@@ -93,8 +93,8 @@ add index idx_first_name(first_name)
 
 
 - Если к базе часто поступают запросы в которых используется фильтр по date(p.payment_date),
-то имеет смысл выделить поле payment_date_only. Но естественно это нужно учесть при внесении / изменении записей. 
-Это актуально именно в случае MySQL, постгрес может создавать индексы по функциям. 
+то имеет смысл выделить поле payment_date_only. Но естественно это нужно учесть при дальнейшем внесении / изменении записей в БД. 
+Это актуально именно в случае MySQL, постгрес может создавать индексы по выражениям. 
 ```sql
 ALTER TABLE payment
 ADD COLUMN payment_date_only DATE;
