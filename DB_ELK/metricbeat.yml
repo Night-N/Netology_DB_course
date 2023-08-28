@@ -1,0 +1,50 @@
+metricbeat.config.modules:
+ path: ${path.config}/modules.d/*.yml
+ reload.enabled: false
+
+metricbeat.modules:
+
+- module: beat
+  metricsets:
+    - stats
+    - state
+  period: 10s
+  hosts: ${FILEBEAT_HOSTS}
+  xpack.enabled: true
+
+- module: elasticsearch
+  xpack.enabled: true
+  period: 10s
+  hosts: ${ELASTIC_HOSTS}
+
+- module: logstash
+  xpack.enabled: true
+  period: 10s
+  hosts: ${LOGSTASH_HOSTS}
+
+- module: kibana
+  metricsets:
+    - stats
+  period: 10s
+  hosts: ${KIBANA_HOSTS}
+  xpack.enabled: true
+
+- module: docker
+  metricsets:
+    - "container"
+    - "cpu"
+    - "diskio"
+    - "healthcheck"
+    - "info"
+    - "memory"
+    - "network"
+  hosts: ["unix:///var/run/docker.sock"]
+  period: 10s
+  enabled: true
+
+processors:
+ - add_host_metadata: ~
+ - add_docker_metadata: ~
+
+output.elasticsearch:
+  hosts: ${ELASTIC_HOSTS}

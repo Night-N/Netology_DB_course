@@ -1,0 +1,12 @@
+- module: nginx
+
+  access:
+    enabled: true
+    var.paths: 
+      - '/usr/share/filebeat/ingest_data/access.log'
+
+  error:
+    enabled: false
+
+  ingress_controller:
+    enabled: false
