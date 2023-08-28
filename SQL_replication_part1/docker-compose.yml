@@ -1,0 +1,44 @@
+version: '3'
+services:
+  mysql-master:
+    image: mysql:8.0.34
+    container_name: mysql-master
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+      MYSQL_ROOT_PASSWORD: "123"
+    ports:
+      - 3306:3306
+    volumes:
+      - db-master:/var/lib/mysql
+      - ./master.cnf:/etc/mysql/conf.d/master.cnf
+    networks:
+      sqlnetwork:
+        ipv4_address: 172.20.0.2
+
+  mysql-slave:
+    image: mysql:8.0.34
+    container_name: mysql-slave
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+      MYSQL_ROOT_PASSWORD: "123"
+    ports:
+      - 3307:3306
+    volumes:
+      - db-slave:/var/lib/mysql
+      - ./slave.cnf:/etc/mysql/conf.d/slave.cnf
+    networks:
+      sqlnetwork:
+        ipv4_address: 172.20.0.3
+volumes:
+  db-slave:
+    driver: local
+  db-master:
+    driver: local
+networks:
+  sqlnetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
