@@ -51,3 +51,65 @@
 Выполните настройку выбранных методов шардинга из задания 2.
 Пришлите конфиг Docker и SQL скрипт с командами для базы данных
 ```
+
+#### Партицирование. На примере постгреса
+- Запускаем pg в контейнере с помощью докер-компоуз 
+- Создаём таблицы
+```sql
+create table users (
+    id bigint not null,
+    name varchar not null,
+    surname varchar not null
+);
+create table books (
+    id bigint not null,
+    title varchar not null,
+    amount bigint not null
+);
+create table store (
+    id bigint not null,
+    address varchar not null
+);
+```
+- Создаём таблицы для четных-нечетных ID, которые наследуют у таблицы users
+```sql
+create table users_1 (
+    check ( id%2 = 0 )
+) inherits (users);
+create table users_2 (
+    check ( id%2 = 1 )
+) inherits (users);
+```
+- Добавляем правила для основной таблицы users на вставку.
+```sql
+create rule insert_to_users_1 as on insert to users
+where (id%2 = 0  )
+do instead insert into users_1 values (NEW.*);
+
+create rule insert_to_users_2 as on insert to users
+where (id%2 = 1  )
+do instead insert into users_2 values (NEW.*) ;
+```
+- Вставляем тестовые данные
+```sql
+INSERT INTO users
+(id, name, surname)
+VALUES
+(1, 'John', 'Green'),
+(2, 'Peter', 'Black'),
+(3, 'Helen', 'Wilson'),
+(4, 'Kelly', 'Roberts');
+```
+
+- Проверяем таблицы.
+Как и ожидалось, все пользователи добавились в свои таблицы в соответствии с ID.
+![](./img/task3-1.jpg)
+
+- При этом мы можем без проблем прочитать все данные из основной таблицы:
+![](./img/task3-2.jpg)
+
+- А при запросе ONLY посмотреть, что в ней нет своих данных
+```sql
+select * from only users;
+```
+- При запросах с соответствующим условием **select * from users where id%2=0** постгрес сканирует только нужную таблицу. 
