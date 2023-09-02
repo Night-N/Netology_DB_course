@@ -1,0 +1,17 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:15.4
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pg-data: 
+    driver: local
