@@ -21,3 +21,5 @@
 #### [SQL. Запросы, 2 часть](./SQL_part2/README.md)
 
 #### [SQL. Репликация](./SQL_replication_part1/README.md)
+
+#### [SQL. Масштабирование](./SQL_sharding/README.md)

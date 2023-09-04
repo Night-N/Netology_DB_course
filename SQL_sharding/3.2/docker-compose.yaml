@@ -1,0 +1,61 @@
+version: "3"
+services:
+  pg-main:
+    image: postgres:15.4
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pg-main-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      pgnet:
+        ipv4_address: 172.20.0.2
+
+  pg-user1:
+    image: postgres:15.4
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pg-user1-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      pgnet:
+        ipv4_address: 172.20.0.3
+        
+  pg-user2:
+    image: postgres:15.4
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pg-user2-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      pgnet:
+        ipv4_address: 172.20.0.4
+
+networks:
+  pgnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  pg-main-data: 
+    driver: local
+  pg-user1-data: 
+    driver: local
+  pg-user2-data: 
+    driver: local

@@ -34,7 +34,7 @@
 Пришлите блоксхему, где и что будет располагаться. Опишите, в каких режимах будут работать сервера.
 ```
 Предположим, что у нас огромная таблица с пользователями. 
-- Для оптимизации запросов к базе выполним партиционирование (вертикальный шардинг) большой таблицы с пользователями - распределим их по четным-нечетным ID:
+- Для оптимизации запросов к базе выполним партицирование (вертикальный шардинг) большой таблицы с пользователями - распределим их по четным-нечетным ID:
 
 <img src="./img/task2-1.jpg" width="400"/>
 
@@ -52,9 +52,12 @@
 Пришлите конфиг Docker и SQL скрипт с командами для базы данных
 ```
 
-#### Партицирование. На примере постгреса
+#### 3.1 Партицирование. Вертикальный шардинг. Postgres
 - Запускаем pg в контейнере с помощью докер-компоуз [docker-compose.yaml](./docker-compose.yaml)
 - Создаём таблицы
+<details>
+  <summary>SQL запрос</summary> 
+
 ```sql
 create table users (
     id bigint not null,
@@ -70,8 +73,15 @@ create table store (
     id bigint not null,
     address varchar not null
 );
-```
+```  
+
+</details>
+
 - Создаём таблицы для четных-нечетных ID, которые наследуют у таблицы users
+
+<details>
+  <summary>SQL запрос</summary> 
+
 ```sql
 create table users_1 (
     check ( id%2 = 0 )
@@ -80,7 +90,14 @@ create table users_2 (
     check ( id%2 = 1 )
 ) inherits (users);
 ```
+
+</details>
+
 - Добавляем правила для основной таблицы users на вставку.
+
+<details>
+  <summary>SQL запрос</summary> 
+
 ```sql
 create rule insert_to_users_1 as on insert to users
 where (id%2 = 0  )
@@ -90,7 +107,14 @@ create rule insert_to_users_2 as on insert to users
 where (id%2 = 1  )
 do instead insert into users_2 values (NEW.*) ;
 ```
+
+</details>
+
 - Вставляем тестовые данные
+
+<details>
+  <summary>SQL запрос</summary> 
+
 ```sql
 INSERT INTO users
 (id, name, surname)
@@ -100,6 +124,7 @@ VALUES
 (3, 'Helen', 'Wilson'),
 (4, 'Kelly', 'Roberts');
 ```
+</details>
 
 - Проверяем таблицы.
 Как и ожидалось, все пользователи добавились в свои таблицы в соответствии с ID.  
@@ -115,3 +140,162 @@ VALUES
 select * from only users;
 ```
 - При запросах с соответствующим условием **select * from users where id%2=0** постгрес сканирует только нужную таблицу.  
+
+#### 3.2 Горизонтальное шардирование с помощью FDW в Postgres
+
+- В сетапе будет три ноды - главная БД, и две отдельные базы для четных/нечетных пользователей.  
+Три контейнера в одной сети докера каждый со своим IP. 
+[Docker-compose.yaml](./3.2/docker-compose.yaml)
+
+- на дополнительных нодах создаём таблицы users с соответствующими ограничениями:
+
+<details>
+  <summary>SQL запрос</summary> 
+
+```sql
+create table users (
+    id bigint not null
+    constraint id_check check (id%2 = 1),
+    name varchar not null,
+    surname varchar not null
+);
+```
+</details>
+
+- на основной ноде подключаем расширение FDW и два сервера
+
+<details>
+  <summary>SQL запрос</summary> 
+
+```sql
+create extension postgres_fdw;
+
+create server users1_server
+foreign data wrapper postgres_fdw
+options (host '172.20.0.3', port '5432', dbname 'test');
+
+create server users2_server
+foreign data wrapper postgres_fdw
+options (host '172.20.0.4', port '5432', dbname 'test');
+
+create user mapping for test
+server users1_server
+options (user 'test', password '123');
+
+create user mapping for test
+server users2_server
+options (user 'test', password '123');
+```
+</details>
+
+- подключаем удалённые таблицы которые наследуют у таблицы users
+
+<details>
+  <summary>SQL запрос</summary> 
+
+```sql
+create foreign table users1 (
+    id bigint not null check ( id%2 = 0 ),
+    name varchar not null,
+    surname varchar not null
+    )
+inherits (users)
+server users1_server
+options (schema_name 'public', table_name 'users');
+
+create foreign table users2 (
+    id bigint not null check ( id%2 = 1 ),
+    name varchar not null,
+    surname varchar not null
+    )
+inherits (users)
+server users2_server
+options (schema_name 'public', table_name 'users');
+```
+</details>
+
+- создаём правила 
+
+<details>
+  <summary>SQL запрос</summary> 
+
+```sql
+create rule insert_to_users_1 as on insert to users
+where (id%2 = 0  )
+do instead insert into users1 values (NEW.*);
+create rule insert_to_users_2 as on insert to users
+where (id%2 = 1  )
+do instead insert into users2 values (NEW.*);
+```
+</details>
+
+- по аналогии с пунктом 3.1 - данные вставляются в соответствующие таблицы, которые благодаря механизму FDW теперь расположены на отдельных нодах  
+Однако при таком подходе в случае отключения одной из нод таблица будет недоступна и всё поломается.
+
+#### 3.3 Postgres + citus. 
+
+В предыдущем примере получилась неотказоустойчивая система, поэтому решил поэкспериментировать с дополнением Citus для PG    
+В докере быстро не получилось подключить citus, поэтому сделал на ВМ Debian.  
+
+Принцип работы распределенных таблиц  
+![](./img/task3-3.jpg)
+
+- Установка расширения
+
+<details>
+  <summary>Команды</summary> 
+
+```bash
+curl https://install.citusdata.com/community/deb.sh | sudo bash
+apt-get -y install postgresql-15-citus-12.0
+pg_conftool 15 main set shared_preload_libraries citus
+pg_conftool 15 main set listen_addresses '*'
++ отредактировать pg_hba.conf для доступа между шардами.
+```
+```sql
+CREATE EXTENSION citus;
+```
+</details>
+
+- Добавление coordinator и worker нод
+  
+<details>
+  <summary>Команды</summary> 
+
+```sql
+SELECT citus_set_coordinator_host('192.168.0.63', 5432);
+SELECT * from citus_add_node('192.168.0.64', 5432);
+SELECT * from citus_add_node('192.168.0.65', 5432);
+```
+</details>
+
+- Создание распределенной таблицы users
+  
+<details>
+  <summary>Команды</summary> 
+
+```sql
+create table users (
+    id bigint not null primary key,
+    name varchar not null,
+    surname varchar not null
+);
+SELECT create_distributed_table('users', 'id');
+```
+
+</details>
+
+- Проверка работы кластера
+
+<details>
+  <summary>Команды</summary> 
+
+```sql
+SELECT * FROM pg_dist_node;
+```
+
+```sql
+SELECT * FROM citus_check_cluster_node_health();
+```
+![](./img/task3-4.jpg)
+</details>
