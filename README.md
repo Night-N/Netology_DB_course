@@ -23,3 +23,5 @@
 #### [SQL. Репликация](./SQL_replication_part1/README.md)
 
 #### [SQL. Масштабирование](./SQL_sharding/README.md)
+
+#### [SQL. Резервное копирование](./SQL_backup/README.md)
