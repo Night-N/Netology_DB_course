@@ -25,3 +25,5 @@
 #### [SQL. Масштабирование](./SQL_sharding/README.md)
 
 #### [SQL. Резервное копирование](./SQL_backup/README.md)
+
+#### [SQL. Базы данных в облаке Yandex Cloud](./SQL_backup/README.md)
