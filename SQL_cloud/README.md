@@ -70,6 +70,23 @@ select * from test_table;
 
 </details>
 
+Перед подключением необходимо установить SSL сертификат яндекс клауд:
+
+```bash
+mkdir -p ~/.postgresql && \
+wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+     --output-document ~/.postgresql/root.crt && \
+chmod 0600 ~/.postgresql/root.crt
+```
+
+Подключение к реплике и проверка БД:
+
+![](./img/task1.jpg)
+
+Панель управления:
+
+![](./img/task1-1.jpg)
+
 ### Задание 2
 ```
 Создайте кластер, как в задании 1 с помощью Terraform.  
@@ -79,3 +96,15 @@ select * from test_table;
 *1) Скриншот созданной базы данных.*  
 *2) Код Terraform, создающий базу данных.*  
 ```
+Конфигурационный файл терраформа:
+
+[main.tf](./terraform/main.tf)
+
+Подключение к только что созданной БД:
+
+![](./img/task2-1.jpg)
+
+Состояние хостов в панели управления яндекс клауд:
+
+![](./img/task2-2.jpg)
+
