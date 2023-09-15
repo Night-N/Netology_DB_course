@@ -8,6 +8,8 @@
 
 #### [Redis, Memcashed](/DB_redis_memcached/README.md)
 
+#### [RabbitMQ](/DB_rabbit/README.md)
+
 ## Реляционные базы данных и администрирование баз данных
 
 #### [Вводная лекция](./SQL_intro/README.md)
