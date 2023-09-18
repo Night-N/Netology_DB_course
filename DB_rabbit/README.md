@@ -14,6 +14,13 @@
 Добавьте management plug-in и зайдите в веб-интерфейс.
 *Итогом выполнения домашнего задания будет приложенный скриншот веб-интерфейса RabbitMQ.*
 ```
+Включение веб-интерфейса:
+```
+rabbitmq-plugins enable rabbitmq_management
+systemctl start rabbitmq-server
+
+```
+![](./img/task1.jpg)
 
 
 ### Задание 2 Отправка и получение сообщений
@@ -29,6 +36,12 @@ $ pip install pika
 *В качестве решения домашнего задания приложите оба скриншота, сделанных на этапе выполнения.*  
 Для закрепления материала можете попробовать модифицировать скрипты, чтобы поменять название очереди и отправляемое сообщение.
 ```
+- Скрипты Python для работы с Rabbit: [./producer.py](./producer.py) [./consumer.py](./consumer.py)  
+- Работа скриптов:  
+![](./img/task2-1.jpg)  
+- Состоянии очереди в GUI:  
+![](./img/task2-2.jpg)    
+
 
 ### Задание 3 Подготовка HA кластера
 
@@ -58,12 +71,28 @@ $ rabbitmqadmin get queue='hello'
 
 *Приложите скриншот результата работы второго скрипта.*
 ```
-
-### Задание 4 Ansible playbook  
-
+- ВМ создаются на локальной машине с помощью Vagrant.
+  - Прокидываются порты для GUI(15672) и AMQP(5672) на хостовую машину
+  - На хостовой машине Windows, поэтому провижн с помощью Ansible работает некорректно. Вагрантом запускается провижн скрипт для установки RabbitMQ [./rabbitmqserver.sh](./rabbitmqserver.sh) (в скрипте - команды из документации Rabbit)
+  - Дополнительно скриптом создаётся пользователь admin и ему даются права, чтобы можно было заходить в GUI с хостовой машины
 ```
-Напишите плейбук, который будет производить установку RabbitMQ на любое количество нод и объединять их в кластер.
-При этом будет автоматически создавать политику ha-all.
+rabbitmqctl add_user admin admin
+rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+rabbitmqctl set_user_tags admin administrator
 
-*Готовый плейбук разместите в своём репозитории.*
-```
+```  
+  - Вагрантом же в каждом хосте дописываются необходимые строчки в /etc/hosts
+  - [./vagrantfile](./vagrantfile)
+  - Далее на хостовой машине две команды:  
+Читаем куки с первой ноды:  
+`vagrant ssh rmq01 -c 'sudo cat /var/lib/rabbitmq/.erlang.cookie'`  
+Записываем на вторую, рестарт и подключение к кластеру:  
+`vagrant ssh rmq02 -c 'echo "SVDWSERLTYSXPXUWJHPK" | sudo tee /var/lib/rabbitmq/.erlang.cookie && sudo systemctl restart rabbitmq-server && sudo rabbitmqctl stop_app && sudo rabbitmqctl join_cluster rabbit@rmq01 && sudo rabbitmqctl start_app'`  
+
+- Состояние кластера:  
+![](./img/task3-1.jpg)  
+![](./img/task3-2.jpg)  
+- Отправка сообщения на первую ноду, проверка очереди на обеих ВМ:  
+![](./img/task3-4.jpg)
+- Отключаю первую ноду, получаю сообщение со второй:
+![](./img/task3-3.jpg)

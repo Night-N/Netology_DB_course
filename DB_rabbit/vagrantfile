@@ -1,0 +1,37 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define "rmq01" do | p |
+    p.vm.box = "ubuntu/jammy64"
+    p.vm.hostname = "rmq01"
+    p.vm.network "private_network", ip: "192.168.1.10", hostname: true
+    p.vm.network "forwarded_port", guest: 15672, host: 15001, id: "rabbitmq01", protocol: "tcp", ipv6: false
+    p.vm.network "forwarded_port", guest: 5672, host: 5001, id: "rabbitamqp01", protocol: "tcp", ipv6: false
+
+    p.vm.provider :virtualbox do |res|
+      res.customize ["modifyvm", :id, "--cpus", "2"]
+      res.customize ["modifyvm", :id, "--memory", "4000"]
+    end
+    p.vm.provision "shell", path: "./rabbitmqserver.sh"
+    p.vm.provision "shell", inline: <<-SHELL
+    echo "192.168.1.11 rmq02" >> /etc/hosts
+    SHELL
+  end
+
+  config.vm.define "rmq02" do | b |
+    b.vm.box = "ubuntu/jammy64"
+    b.vm.hostname = "rmq02"
+    b.vm.network "private_network", ip: "192.168.1.11", hostname: true
+    b.vm.network "forwarded_port", guest: 15672, host: 15002, id: "rabbitmq02", protocol: "tcp", ipv6: false
+    b.vm.network "forwarded_port", guest: 5672, host: 5002, id: "rabbitamqp02", protocol: "tcp", ipv6: false
+
+    b.vm.provider :virtualbox do |res|
+      res.customize ["modifyvm", :id, "--cpus", "2"]
+      res.customize ["modifyvm", :id, "--memory", "4000"]
+    end
+    b.vm.provision "shell", path: "./rabbitmqserver.sh"
+    b.vm.provision "shell", inline: <<-SHELL
+    echo "192.168.1.10 rmq01" >> /etc/hosts
+    SHELL
+  end
+end
